@@ -1,3 +1,4 @@
+import re
 import numpy as np
 import os.path as osp
 from setuptools import setup, find_packages
@@ -12,11 +13,19 @@ def readme():
 
 
 def find_version():
-    version_file = 'torchreid/__init__.py'
-    with open(version_file, 'r') as f:
-        exec(compile(f.read(), version_file, 'exec'))
-    return locals()['__version__']
-
+    version_file = "torchreid/__init__.py"
+    with open(version_file, "r", encoding="utf-8") as file:
+        content = file.read()
+    match = re.search(
+        r"^__version__\s*=\s*['\"]([^'\"]+)['\"]",
+        content,
+        flags=re.MULTILINE,
+    )
+    if match is None:
+        raise RuntimeError(
+            f"Could not find __version__ in {version_file}"
+        )
+    return match.group(1)
 
 def numpy_include():
     try:
@@ -51,7 +60,8 @@ setup(
     long_description=readme(),
     url='https://github.com/KaiyangZhou/deep-person-reid',
     packages=find_packages(),
-    install_requires=get_requirements(),
+    install_requires=["numpy", "h5py", "Pillow", "six", "scipy", "opencv-python", "matplotlib", "tensorboard", "future", "yacs", "gdown", "imageio",],
+    extras_require={"dev": ["flake8", "yapf", "isort==4.3.21", ],},
     keywords=['Person Re-Identification', 'Deep Learning', 'Computer Vision'],
     ext_modules=cythonize(ext_modules)
 )
